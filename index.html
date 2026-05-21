@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Vision Studio</title>
+    <style>
+        :root {
+            --accent-color: #8b5cf6;
+            --surface: #1e1e2e;
+            --bg: #11111b;
+            --text: #cdd6f4;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Шапка в стиле твоего оригинала, но переработанная */
+        header {
+            width: 100%;
+            padding: 50px 20px;
+            background: linear-gradient(180deg, #181825 0%, var(--bg) 100%);
+            text-align: center;
+        }
+
+        .search-zone {
+            display: flex;
+            gap: 12px;
+            max-width: 800px;
+            margin: 20px auto;
+            width: 90%;
+        }
+
+        input {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 12px;
+            border: 1px solid #313244;
+            background: var(--surface);
+            color: white;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+        .gen-button {
+            padding: 0 25px;
+            background: var(--accent-color);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .gen-button:hover {
+            opacity: 0.9;
+        }
+
+        /* Сетка для вывода "результатов" */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            width: 90%;
+            max-width: 1200px;
+            padding: 40px 0;
+        }
+
+        .image-card {
+            background: var(--surface);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #313244;
+            transition: transform 0.3s;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .image-card img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-info {
+            padding: 15px;
+        }
+
+        .card-info p {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .loader {
+            display: none;
+            margin: 20px;
+            font-style: italic;
+            color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>AI Image Generator</h1>
+        <p style="opacity: 0.6;">Превратите текст в визуальный шедевр</p>
+        
+        <div class="search-zone">
+            <input type="text" id="prompt-input" placeholder="Опишите, что хотите увидеть...">
+            <button class="gen-button" id="start-gen">Создать</button>
+        </div>
+        <div id="loading-state" class="loader">Нейросеть рисует...</div>
+    </header>
+
+    <main class="gallery-grid" id="gallery"></main>
+
+    <script>
+        const input = document.getElementById('prompt-input');
+        const button = document.getElementById('start-gen');
+        const gallery = document.getElementById('gallery');
+        const loader = document.getElementById('loading-state');
+
+        // Функция генерации (смысл похож на твой getUniversity, но логика иная)
+        async function generateArt() {
+            const text = input.value.trim();
+            if (!text) return alert("Введите описание!");
+
+            loader.style.display = 'block';
+            
+            // Генерируем уникальный сид для разнообразия картинок
+            const seed = Math.floor(Math.random() * 100000);
+            const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(text)}?width=1024&height=1024&seed=${seed}&model=flux`;
+
+            // Создаем карточку (аналог твоих "boxes")
+            const card = document.createElement('div');
+            card.className = 'image-card';
+            
+            card.innerHTML = `
+                <img src="${imageUrl}" alt="${text}" onload="this.parentElement.style.opacity='1'">
+                <div class="card-info">
+                    <p><b>Запрос:</b> ${text}</p>
+                    <small style="opacity: 0.5">Model: Flux AI • Seed: ${seed}</small>
+                </div>
+            `;
+
+            // Добавляем в начало списка
+            gallery.prepend(card);
+            
+            // Очистка и скрытие лоадера
+            input.value = '';
+            loader.style.display = 'none';
+        }
+
+        button.addEventListener('click', generateArt);
+
+        // Работает по Enter, как в современных сайтах
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') generateArt();
+        });
+    </script>
+</body>
+</html>
